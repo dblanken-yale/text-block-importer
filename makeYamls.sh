@@ -6,6 +6,16 @@ if [ -z "$1" ]; then
   exit 1
 fi
 
+if [ -z "$2" ]; then
+  echo "No html selector given."
+  exit 1
+fi
+
+if [ -z "$3" ]; then
+  echo "No template file given."
+  exit 1
+fi
+
 i=1
 
 # For each line inside of the file, call the createYaml.rb script.
