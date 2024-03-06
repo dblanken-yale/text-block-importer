@@ -12,7 +12,7 @@ i=1
 while IFS='' read -r line || [[ -n "$line" ]]; do
   echo "Creating yaml for $line"
   # remove \n from line.
-  line=$(echo $line | tr -d '\n')
+  line=$(echo "$line" | tr -d '\n')
   ruby createYaml.rb "$line" "$2" "$3" "node-$i.output.yml"
   i=$((i + 1))
 done < "$1"
