@@ -10,9 +10,11 @@ end
 uri = URI(ARGV[0])
 response = Net::HTTP.get(uri)
 doc = Nokogiri::HTML(response)
-html_output = doc.at(ARGV[1])
+html_output = doc.css(ARGV[1])
 
-html_output = html_output.to_s.strip.gsub("\n", "")
+# Remove all new lines and extra spaces from the html output for each node found and join them
+html_output = html_output.map { |output| output.to_s.strip.gsub("\n", "") }.join(" ")
+
 # Extract web page file name from URI
 web_page_file_name = File.basename(uri.path) || ""
 # Extract domain of the URI
