@@ -7,12 +7,13 @@ could import text block into a YaleSite that is using single content sync.
 
 ## How do I use it?
 
-1. You must have a recent version of ruby, and nokogiri. You can install nokogiri with `gem install nokogiri`.
-2. You'll then either create your own text file of urls or have it scour a web page to get them using the following command:
+1. `git clone` this repo and cd into it.
+2. You must have a recent version of ruby, and nokogiri. You can install nokogiri with `gem install nokogiri`.
+3. You'll then either create your own text file of urls or have it scour a web page to get them using the following command:
 ```bash
 ruby extractUrls.rb <URL> <HTML Selector to look at>
 ```
-3. Once you have that, you can run:
+4. Once you have that, you can run:
 ```bash
 ./makeYamls.sh <url text file> <HTML selector to scrape> <template file>
 ```
