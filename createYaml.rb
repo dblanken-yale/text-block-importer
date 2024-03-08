@@ -33,6 +33,11 @@ first_h1 =
 
 # So far only single quotes made us not work, so I'm encoding them.
 html_output = html_output.to_s.strip.gsub("\n", "").gsub("'", "&#39;")
+
+if (html_output.empty?)
+  STDERR.puts("No data found for the given selector...continuing--be aware! [#{ARGV[0]}]")
+end
+
 # Extract web page file name from URI
 web_page_file_name = File.basename(uri.path) || ""
 
