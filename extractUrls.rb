@@ -15,6 +15,11 @@ html_output = doc.css(ARGV[1])
 # Remove all new lines and extra spaces from the html output for each node found and join them
 html_output = html_output.map { |output| output.to_s.strip.gsub("\n", "") }.join(" ")
 
+if (html_output.empty?)
+  STDERR.puts("No data found for the given selector.")
+  exit
+end
+
 # Extract web page file name from URI
 web_page_file_name = File.basename(uri.path) || ""
 # Extract domain of the URI
