@@ -25,6 +25,17 @@ could import text block into a YaleSite that is using single content sync.
 
    In the case of what's here, you'd use the `template.yml` file for the
    template file.
+2. In the case that the URL text file is a sitemap, you can use:
+
+   ```bash
+   ./retrieveSitemap <sitemap url>
+   ```
+
+   to get the sitemap links into a text file to use in the above makeYamls.sh
+
+   NOTE: you will need `xmllint` via
+   [libxml2](https://formulae.brew.sh/formula/libxml2) on your system to do
+   this.
 
 ## What if I have a one-off page?
 
