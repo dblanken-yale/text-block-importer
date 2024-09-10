@@ -11,6 +11,7 @@ base_fields:
   url: {URL}
   revision_log_message: null
   revision_uid: '1'
+  moderation_state: published
 custom_fields:
   field_external_source: null
   field_login_required:
