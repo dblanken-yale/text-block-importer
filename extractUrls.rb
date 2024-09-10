@@ -11,6 +11,7 @@ uri = URI(ARGV[0])
 response = Net::HTTP.get(uri)
 doc = Nokogiri::HTML(response)
 html_output = doc.css(ARGV[1])
+domain = ARGV[2]
 
 # Remove all new lines and extra spaces from the html output for each node found and join them
 html_output = html_output.map { |output| output.to_s.strip.gsub("\n", "") }.join(" ")
@@ -23,7 +24,7 @@ end
 # Extract web page file name from URI
 web_page_file_name = File.basename(uri.path) || ""
 # Extract domain of the URI
-domain = uri.host
+domain ||= uri.host
 
 # Get all link urls from the html output where it is from the same domain or is a relative url.
 urls = html_output.scan(/href=["'](\/[^"']*)["']|href=["'](https?:\/\/#{domain}[^"']*)["']/).flatten.compact
