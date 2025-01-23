@@ -64,6 +64,8 @@ end
 # Extract web page file name from URI
 web_page_file_name = File.basename(uri.path) || ""
 
+source_url = ARGV[0]
+
 # Define replacements
 replacements = {
   "{NAME}" => first_h1,
@@ -71,6 +73,7 @@ replacements = {
   "{UUID}" => SecureRandom.uuid,
   "{BLOCK_UUID}" => SecureRandom.uuid,
   "{REPLACEME}" => html_output,
+  "{SOURCE_URL}" => source_url,
 }
 
 # Load template content

@@ -13,7 +13,11 @@ base_fields:
   revision_uid: '1'
   moderation_state: published
 custom_fields:
-  field_external_source: null
+  field_external_source:
+      -
+        uri: '{SOURCE_URL}'
+        title: ''
+        options: {  }
   field_login_required:
     -
       value: '0'
