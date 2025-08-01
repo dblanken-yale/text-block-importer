@@ -49,14 +49,8 @@ jobs:
     # - name: Run linter
     #   run: bundle exec rubocop --display-cop-names
 
-    - name: Run unit tests
-      run: SPEC_OPTS="--backtrace" bundle exec rake spec:unit
-
-    - name: Run integration tests
-      run: SPEC_OPTS="--backtrace" bundle exec rake spec:integration
-
     - name: Run full test suite with coverage
-      run: SPEC_OPTS="--backtrace" bundle exec rake spec:ci
+      run: bundle exec rspec
 
     - name: Archive test results
       if: always()
