@@ -1,0 +1,42 @@
+# Example custom configuration file
+# Copy this to ~/.text_block_importer.yml or ./text_block_importer.yml
+
+# HTTP Client Settings
+http:
+  timeout: 45
+  retries: 5
+  user_agent: "MyCustomBot/1.0"
+  follow_redirects: true
+
+# Logging Configuration
+logging:
+  level: debug
+  output: stdout
+
+# Content Processing
+processing:
+  strip_newlines: true
+  encode_quotes: true
+  warn_empty_content: true
+
+# Template System
+templates:
+  tokens:
+    name_selector: "h1, .title, .page-title"
+    encode_title: true
+
+# Batch Processing
+batch:
+  show_progress: true
+  continue_on_error: false  # Stop on first error
+
+# Sitemap Processing
+sitemap:
+  recursive: true          # Enable recursive parsing of nested sitemaps
+  max_depth: 5            # Maximum recursion depth
+  same_domain_only: true  # Only follow sitemaps from same domain
+
+# Output Settings
+output:
+  filename_pattern: "imported-{index}.yml"
+  create_directories: true

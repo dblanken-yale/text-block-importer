@@ -88,20 +88,34 @@ Example:
 
 This will output a list of URLs that can be saved to a file for further processing.
 
-### 4. Processing a Sitemap
+### 4. Processing a Sitemap (with Recursive Support)
 
 To extract URLs from a sitemap:
 
 ```bash
-./text_block_importer sitemap <sitemap URL>
+./text_block_importer sitemap <sitemap URL> [--output filename]
 ```
 
-Example:
+Examples:
 ```bash
+# Use default output file (sitemap.links)
 ./text_block_importer sitemap https://example.yale.edu/sitemap.xml
+
+# Specify custom output filename
+./text_block_importer sitemap https://example.yale.edu/sitemap.xml --output yale-urls.txt
 ```
 
-This will create a `sitemap.links` file containing all URLs from the sitemap, which can then be used with the batch command.
+This will create a file containing all URLs from the sitemap. **The tool automatically detects and processes nested sitemaps** - if the main sitemap contains links to other sitemaps (like `sitemap-posts.xml`, `sitemap-pages.xml`), they will be processed recursively and all URLs will be aggregated into a single output file.
+
+#### Nested Sitemap Detection
+
+The tool intelligently detects nested sitemaps by checking if URLs:
+- Have the same domain as the parent sitemap
+- Are in the same directory path  
+- Follow sitemap naming patterns (contain "sitemap" and end with ".xml")
+- Are not regular web pages
+
+This works great for WordPress sites and other CMS platforms that generate multiple sitemap files.
 
 ### Getting Help
 
@@ -124,6 +138,28 @@ The following placeholders in your template file will be replaced:
 | `{REPLACEME}` | The HTML content extracted from the CSS selector |
 | `{SOURCE_URL}` | The original source URL |
 
+## Output Organization
+
+The tool automatically organizes output files into domain-based directories to prevent collisions:
+
+```
+output/
+├── example.yale.edu/
+│   ├── sitemap.links
+│   ├── node-1.output.yml
+│   ├── node-2.output.yml
+│   └── ...
+└── other-site.edu/
+    ├── sitemap.links
+    └── ...
+```
+
+This structure allows you to:
+- Process multiple sites without file conflicts
+- Keep outputs organized by source domain
+- Use `.gitignore` to exclude the entire `output/` directory
+- Configure the behavior in `config/default.yml` or custom config files
+
 ## Example Workflow
 
 A complete workflow might look like:
@@ -131,14 +167,26 @@ A complete workflow might look like:
 1. Extract URLs from a sitemap:
    ```bash
    ./text_block_importer sitemap https://example.yale.edu/sitemap.xml
+   # Creates: output/example.yale.edu/sitemap.links
    ```
 
-2. Process all URLs from the sitemap:
+2. Process all URLs using the sitemap file:
    ```bash
-   ./text_block_importer batch sitemap.links ".content-main" template.yml
+   ./text_block_importer batch output/example.yale.edu/sitemap.links ".content-main" template.yml
+   # Creates: output/example.yale.edu/node-*.output.yml
    ```
 
-3. Import the resulting YAML files into your YaleSite instance using the single content sync process.
+3. Import the resulting YAML files from `output/example.yale.edu/` into your YaleSite instance.
+
+### Custom Output Names
+```bash
+# Custom sitemap filename
+./text_block_importer sitemap https://example.yale.edu/sitemap.xml --output yale-pages.txt
+# Creates: output/example.yale.edu/yale-pages.txt
+
+# Process with custom file
+./text_block_importer batch output/example.yale.edu/yale-pages.txt ".content-main" template.yml
+```
 
 ## Troubleshooting
 

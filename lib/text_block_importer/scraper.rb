@@ -1,10 +1,14 @@
+# frozen_string_literal: true
+
 require 'nokogiri'
 require 'uri'
 
 module TextBlockImporter
   class Scraper
-    def initialize(http_client = HttpClient.new)
-      @http_client = http_client
+    def initialize(config = Config.new, logger = nil)
+      @config = config
+      @logger = logger
+      @http_client = HttpClient.new(config, logger)
     end
     
     def scrape(url, selector, options = {})
@@ -30,16 +34,23 @@ module TextBlockImporter
       element = doc.at(selector)
       return '' unless element
       
-      content = element.to_s.strip.gsub("\n", "").gsub("'", "&#39;")
-      if content.empty?
-        STDERR.puts("No data found for the given selector...continuing--be aware! [#{selector}]")
-        return ''
+      content = element.to_s.strip
+      content = content.gsub("\n", "") if @config.strip_newlines?
+      content = content.gsub("'", "&#39;") if @config.encode_quotes?
+      
+      if content.empty? && @config.warn_empty_content?
+        warning = "No data found for selector '#{selector}'"
+        @logger&.warn(warning)
+        STDERR.puts("Warning: #{warning}")
       end
+      
       content
     end
     
     def extract_title(doc)
-      doc.search("h1").map(&:text).first&.gsub("'", "&#39;") || ''
+      title = doc.search(@config.name_selector).map(&:text).first || ''
+      title = title.gsub("'", "&#39;") if @config.encode_title?
+      title
     end
     
     def extract_domain(url)

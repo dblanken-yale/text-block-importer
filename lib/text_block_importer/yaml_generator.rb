@@ -1,10 +1,15 @@
+# frozen_string_literal: true
+
 require 'securerandom'
 require 'uri'
+require 'fileutils'
 
 module TextBlockImporter
   class YamlGenerator
-    def initialize(template_path)
+    def initialize(template_path, config = Config.new, logger = nil)
       @template_content = File.read(template_path)
+      @config = config
+      @logger = logger
     end
     
     def generate(scraped_content, options = {})
@@ -23,6 +28,13 @@ module TextBlockImporter
     end
     
     def save(yaml_content, output_path)
+      # Create output directory if needed
+      if @config.create_directories?
+        dir = File.dirname(output_path)
+        FileUtils.mkdir_p(dir) unless Dir.exist?(dir)
+      end
+      
+      @logger&.debug("Writing YAML to: #{output_path}")
       File.write(output_path, yaml_content)
     end
     
