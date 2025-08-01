@@ -10,7 +10,7 @@ Gem::Specification.new do |spec|
   spec.authors = ['Yale ITS']
   spec.email = ['its-web-dev@yale.edu']
   
-  spec.files = Dir['lib/**/*', 'README.md', 'CLAUDE.md', 'template.yml']
+  spec.files = Dir['lib/**/*', 'README.md', 'template.yml']
   spec.executables = ['text_block_importer']
   spec.require_paths = ['lib']
   
