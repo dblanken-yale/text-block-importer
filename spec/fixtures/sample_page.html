@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sample Test Page</title>
+</head>
+<body>
+  <header>
+    <h1>Sample Test Page</h1>
+    <nav>
+      <a href="/home">Home</a>
+      <a href="/about">About</a>
+      <a href="https://external.example.com/page">External Link</a>
+    </nav>
+  </header>
+  
+  <main class="content-main">
+    <h2>Main Content Section</h2>
+    <p>This is a sample paragraph with <strong>bold text</strong> and <em>italic text</em>.</p>
+    <p>Another paragraph with a <a href="/internal-link">relative link</a> and an <a href="https://example.com/absolute">absolute link</a>.</p>
+    
+    <ul>
+      <li>List item one</li>
+      <li>List item two</li>
+      <li>List item three</li>
+    </ul>
+    
+    <blockquote>
+      This is a sample blockquote that contains some longer text to test content extraction.
+    </blockquote>
+    
+    <div class="special-content">
+      <p>Content in a special div that might need special handling.</p>
+      <img src="/images/sample.jpg" alt="Sample image" />
+    </div>
+  </main>
+
+  <aside class="sidebar">
+    <h3>Sidebar Content</h3>
+    <p>This content should not be extracted by the main content selector.</p>
+  </aside>
+
+  <footer>
+    <p>&copy; 2024 Test Site. All rights reserved.</p>
+    <nav>
+      <a href="/contact">Contact</a>
+      <a href="/privacy">Privacy</a>
+    </nav>
+  </footer>
+</body>
+</html>

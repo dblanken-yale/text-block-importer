@@ -1,0 +1,126 @@
+name: Test Suite
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  COVERAGE: true
+  CI: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        ruby-version: ['3.0', '3.1', '3.2', '3.3']
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Ruby ${{ matrix.ruby-version }}
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby-version }}
+        bundler-cache: true
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libxml2-utils curl
+
+    - name: Create necessary directories
+      run: |
+        mkdir -p tmp
+        mkdir -p log
+        mkdir -p coverage
+
+    - name: Install dependencies
+      run: |
+        bundle install --jobs 4 --retry 3
+
+    - name: Verify dependencies
+      run: bundle exec rake verify:deps
+
+    - name: Run linter
+      run: bundle exec rubocop --display-cop-names
+
+    - name: Run unit tests
+      run: bundle exec rake spec:unit
+
+    - name: Run integration tests
+      run: bundle exec rake spec:integration
+
+    - name: Run full test suite with coverage
+      run: bundle exec rake spec:ci
+
+    - name: Upload coverage reports to Codecov
+      if: matrix.ruby-version == '3.2'
+      uses: codecov/codecov-action@v4
+      with:
+        file: ./coverage/.resultset.json
+        flags: unittests
+        name: codecov-umbrella
+        fail_ci_if_error: false
+
+    - name: Archive test results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results-${{ matrix.ruby-version }}
+        path: |
+          tmp/rspec_results.xml
+          coverage/
+
+  shellcheck:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Run ShellCheck
+      uses: ludeeus/action-shellcheck@master
+      with:
+        scandir: '.'
+        format: gcc
+        severity: warning
+      env:
+        SHELLCHECK_OPTS: -e SC1091 -e SC2034
+
+  security:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.2'
+        bundler-cache: true
+    
+    - name: Run Bundler Audit
+      run: |
+        gem install bundler-audit
+        bundle audit --update
+
+  performance:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.2'
+        bundler-cache: true
+    
+    - name: Run performance tests
+      run: |
+        bundle exec rspec spec/integration/full_workflow_spec.rb -t performance --format progress
+      env:
+        PERFORMANCE_TESTS: true

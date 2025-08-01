@@ -17,27 +17,27 @@ module TextBlockImporter
     end
     
     def http
-      @data.dig('http') || {}
+      data.dig('http') || {}
     end
     
     def logging
-      @data.dig('logging') || {}
+      data.dig('logging') || {}
     end
     
     def processing
-      @data.dig('processing') || {}
+      data.dig('processing') || {}
     end
     
     def templates
-      @data.dig('templates') || {}
+      data.dig('templates') || {}
     end
     
     def batch
-      @data.dig('batch') || {}
+      data.dig('batch') || {}
     end
     
     def output
-      @data.dig('output') || {}
+      data.dig('output') || {}
     end
     
     # HTTP settings
@@ -136,7 +136,7 @@ module TextBlockImporter
     end
     
     def sitemap
-      @data.dig('sitemap') || {}
+      data.dig('sitemap') || {}
     end
     
     private

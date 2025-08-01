@@ -1,0 +1,46 @@
+site_uuid: test-site-uuid
+uuid: {UUID}
+entity_type: node
+bundle: page
+base_fields:
+  title: '{NAME}'
+  status: true
+  langcode: en
+  created: '1709572001'
+  author: test@example.com
+  url: {URL}
+  revision_log_message: null
+  revision_uid: '1'
+  moderation_state: published
+custom_fields:
+  field_external_source:
+      -
+        uri: '{SOURCE_URL}'
+        title: ''
+        options: {  }
+  field_login_required:
+    -
+      value: '0'
+  field_metatags: null
+  field_tags: null
+  field_teaser_media: null
+  field_teaser_text: null
+  field_teaser_title: null
+  layout_builder__layout:
+    sections: test_sections_data
+    blocks:
+      -
+        uuid: {BLOCK_UUID}
+        entity_type: block_content
+        bundle: text
+        base_fields:
+          info: TextBlock
+          reusable: false
+          langcode: en
+          block_revision_id: '337'
+          enforce_new_revision: true
+        custom_fields:
+          field_text:
+            -
+              value: '{REPLACEME}'
+              format: basic_html

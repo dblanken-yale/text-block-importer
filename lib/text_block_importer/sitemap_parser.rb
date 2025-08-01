@@ -100,8 +100,11 @@ module TextBlockImporter
       parent_uri = URI.parse(parent_sitemap_url)
       url_uri = URI.parse(url)
       
-      # Same domain check
-      return false if parent_uri.host != url_uri.host
+      # For cross-domain sitemaps, let should_skip_sitemap? handle the filtering
+      # Only return true if it looks like a sitemap (has sitemap and .xml in the URL)
+      if parent_uri.host != url_uri.host
+        return true  # Let should_skip_sitemap? decide if we should skip this
+      end
       
       # For paginated sitemaps like sitemap.xml?page=1
       if url_uri.path == parent_uri.path && url_uri.query&.include?('page')

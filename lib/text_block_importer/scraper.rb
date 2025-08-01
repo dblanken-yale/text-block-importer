@@ -34,15 +34,19 @@ module TextBlockImporter
       element = doc.at(selector)
       return '' unless element
       
+      # Check if the element has meaningful text content
+      if element.text.strip.empty?
+        if @config.warn_empty_content?
+          warning = "No data found for selector '#{selector}'"
+          @logger&.warn(warning)
+          $stderr.puts("Warning: #{warning}")
+        end
+        return ''
+      end
+      
       content = element.to_s.strip
       content = content.gsub("\n", "") if @config.strip_newlines?
       content = content.gsub("'", "&#39;") if @config.encode_quotes?
-      
-      if content.empty? && @config.warn_empty_content?
-        warning = "No data found for selector '#{selector}'"
-        @logger&.warn(warning)
-        STDERR.puts("Warning: #{warning}")
-      end
       
       content
     end

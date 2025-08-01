@@ -17,6 +17,17 @@ module TextBlockImporter
     end
     
     def run
+      # Handle version and help flags first
+      if @args.include?('--version') || @args.include?('-v')
+        show_version
+        return
+      end
+      
+      if @args.include?('--help') || @args.include?('-h')
+        show_help
+        return
+      end
+      
       case @args[0]
       when 'scrape'
         scrape_single
@@ -28,6 +39,7 @@ module TextBlockImporter
         process_sitemap
       else
         show_help
+        exit 1
       end
     rescue TextBlockImporter::Error => e
       STDERR.puts "Error: #{e.message}"
@@ -193,6 +205,10 @@ module TextBlockImporter
           # Extract URLs from page
           text_block_importer extract-urls https://example.com 'a'
       HELP
+    end
+    
+    def show_version
+      puts "#{TextBlockImporter::VERSION}"
     end
     
     def parse_options

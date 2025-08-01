@@ -20,7 +20,7 @@ module TextBlockImporter
         if value
           content.gsub!(placeholder, value.to_s)
         else
-          STDERR.puts "Could not replace for #{placeholder}"
+          $stderr.puts "Could not replace for #{placeholder}"
         end
       end
       
@@ -31,7 +31,14 @@ module TextBlockImporter
       # Create output directory if needed
       if @config.create_directories?
         dir = File.dirname(output_path)
-        FileUtils.mkdir_p(dir) unless Dir.exist?(dir)
+        unless Dir.exist?(dir)
+          begin
+            FileUtils.mkdir_p(dir)
+          rescue Errno::EEXIST => e
+            # Re-raise as ENOTDIR if we can't create directory because parent is a file
+            raise Errno::ENOTDIR, e.message
+          end
+        end
       end
       
       @logger&.debug("Writing YAML to: #{output_path}")

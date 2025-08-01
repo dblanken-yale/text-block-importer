@@ -42,7 +42,7 @@ module TextBlockImporter
     
     def extract_domain(url)
       URI.parse(url).host
-    rescue URI::InvalidURIError => e
+    rescue URI::InvalidURIError
       @logger&.warn("Invalid URL for domain extraction: #{url}")
       'unknown-domain'
     end
