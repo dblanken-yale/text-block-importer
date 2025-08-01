@@ -22,4 +22,5 @@ end
 
 group :development do
   gem 'bundler', '~> 2.4'
+  gem 'rake'
 end
