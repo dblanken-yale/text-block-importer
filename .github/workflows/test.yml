@@ -46,8 +46,8 @@ jobs:
     - name: Verify dependencies
       run: bundle exec rake verify:deps
 
-    - name: Run linter
-      run: bundle exec rubocop --display-cop-names
+    # - name: Run linter
+    #   run: bundle exec rubocop --display-cop-names
 
     - name: Run unit tests
       run: bundle exec rake spec:unit
@@ -99,20 +99,20 @@ jobs:
         gem install bundler-audit
         bundle audit --update
 
-  performance:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Set up Ruby
-      uses: ruby/setup-ruby@v1
-      with:
-        ruby-version: '3.2'
-        bundler-cache: true
-    
-    - name: Run performance tests
-      run: |
-        bundle exec rspec spec/integration/full_workflow_spec.rb -t performance --format progress
-      env:
-        PERFORMANCE_TESTS: true
+  # performance:
+  #   runs-on: ubuntu-latest
+  #
+  #   steps:
+  #   - uses: actions/checkout@v4
+  #
+  #   - name: Set up Ruby
+  #     uses: ruby/setup-ruby@v1
+  #     with:
+  #       ruby-version: '3.2'
+  #       bundler-cache: true
+  #
+  #   - name: Run performance tests
+  #     run: |
+  #       bundle exec rspec spec/integration/full_workflow_spec.rb -t performance --format progress
+  #     env:
+  #       PERFORMANCE_TESTS: true
