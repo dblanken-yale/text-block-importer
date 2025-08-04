@@ -187,30 +187,34 @@ RSpec.describe TextBlockImporter::CLI do
       end
 
       it 'validates url argument is present' do
-        cli = described_class.new(['scrape', '', '.content', 'template.yml', 'output.yml'])
+        cli = described_class.new(['scrape', nil, '.content', 'template.yml', 'output.yml'])
         
         expect(STDERR).to receive(:puts).with('Error: Missing required arguments')
+        expect(STDERR).to receive(:puts).with('Usage: text_block_importer scrape <url> <selector> <template> <output>')
         expect { cli.run }.to raise_error(SystemExit)
       end
 
       it 'validates selector argument is present' do
-        cli = described_class.new(['scrape', 'http://example.com', '', 'template.yml', 'output.yml'])
+        cli = described_class.new(['scrape', 'http://example.com', nil, 'template.yml', 'output.yml'])
         
         expect(STDERR).to receive(:puts).with('Error: Missing required arguments')
+        expect(STDERR).to receive(:puts).with('Usage: text_block_importer scrape <url> <selector> <template> <output>')
         expect { cli.run }.to raise_error(SystemExit)
       end
 
       it 'validates template argument is present' do
-        cli = described_class.new(['scrape', 'http://example.com', '.content', '', 'output.yml'])
+        cli = described_class.new(['scrape', 'http://example.com', '.content', nil, 'output.yml'])
         
         expect(STDERR).to receive(:puts).with('Error: Missing required arguments')
+        expect(STDERR).to receive(:puts).with('Usage: text_block_importer scrape <url> <selector> <template> <output>')
         expect { cli.run }.to raise_error(SystemExit)
       end
 
       it 'validates output argument is present' do
-        cli = described_class.new(['scrape', 'http://example.com', '.content', 'template.yml', ''])
+        cli = described_class.new(['scrape', 'http://example.com', '.content', 'template.yml', nil])
         
         expect(STDERR).to receive(:puts).with('Error: Missing required arguments')
+        expect(STDERR).to receive(:puts).with('Usage: text_block_importer scrape <url> <selector> <template> <output>')
         expect { cli.run }.to raise_error(SystemExit)
       end
     end
@@ -225,23 +229,26 @@ RSpec.describe TextBlockImporter::CLI do
       end
 
       it 'validates url_file argument is present' do
-        cli = described_class.new(['batch', '', '.content', 'template.yml'])
+        cli = described_class.new(['batch', nil, '.content', 'template.yml'])
         
         expect(STDERR).to receive(:puts).with('Error: Missing required arguments')
+        expect(STDERR).to receive(:puts).with('Usage: text_block_importer batch <url_file> <selector> <template>')
         expect { cli.run }.to raise_error(SystemExit)
       end
 
       it 'validates selector argument is present' do
-        cli = described_class.new(['batch', 'urls.txt', '', 'template.yml'])
+        cli = described_class.new(['batch', 'urls.txt', nil, 'template.yml'])
         
         expect(STDERR).to receive(:puts).with('Error: Missing required arguments')
+        expect(STDERR).to receive(:puts).with('Usage: text_block_importer batch <url_file> <selector> <template>')
         expect { cli.run }.to raise_error(SystemExit)
       end
 
       it 'validates template argument is present' do
-        cli = described_class.new(['batch', 'urls.txt', '.content', ''])
+        cli = described_class.new(['batch', 'urls.txt', '.content', nil])
         
         expect(STDERR).to receive(:puts).with('Error: Missing required arguments')
+        expect(STDERR).to receive(:puts).with('Usage: text_block_importer batch <url_file> <selector> <template>')
         expect { cli.run }.to raise_error(SystemExit)
       end
     end
@@ -256,16 +263,18 @@ RSpec.describe TextBlockImporter::CLI do
       end
 
       it 'validates url argument is present' do
-        cli = described_class.new(['extract-urls', '', 'a'])
+        cli = described_class.new(['extract-urls', nil, 'a'])
         
         expect(STDERR).to receive(:puts).with('Error: Missing required arguments')
+        expect(STDERR).to receive(:puts).with('Usage: text_block_importer extract-urls <url> <selector>')
         expect { cli.run }.to raise_error(SystemExit)
       end
 
       it 'validates selector argument is present' do
-        cli = described_class.new(['extract-urls', 'http://example.com', ''])
+        cli = described_class.new(['extract-urls', 'http://example.com', nil])
         
         expect(STDERR).to receive(:puts).with('Error: Missing required arguments')
+        expect(STDERR).to receive(:puts).with('Usage: text_block_importer extract-urls <url> <selector>')
         expect { cli.run }.to raise_error(SystemExit)
       end
     end
@@ -280,9 +289,10 @@ RSpec.describe TextBlockImporter::CLI do
       end
 
       it 'validates sitemap_url argument is not empty' do
-        cli = described_class.new(['sitemap', ''])
+        cli = described_class.new(['sitemap', nil])
         
         expect(STDERR).to receive(:puts).with('Error: Missing required arguments')
+        expect(STDERR).to receive(:puts).with('Usage: text_block_importer sitemap <sitemap_url> [--output filename]')
         expect { cli.run }.to raise_error(SystemExit)
       end
     end
