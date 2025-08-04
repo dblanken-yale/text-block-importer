@@ -58,9 +58,9 @@ jobs:
         echo "SimpleCov gem installed:"
         bundle list | grep simplecov || echo "SimpleCov not found"
         echo "Testing SimpleCov require:"
-        ruby -e "require 'simplecov'; puts 'SimpleCov loaded successfully'" || echo "Failed to load SimpleCov"
+        bundle exec ruby -e "require 'simplecov'; puts 'SimpleCov loaded successfully'" || echo "Failed to load SimpleCov"
         echo "Testing SimpleCov start:"
-        ruby -e "
+        bundle exec ruby -e "
           ENV['COVERAGE'] = 'true'
           ENV['CI'] = 'true'
           require 'simplecov'
@@ -89,7 +89,7 @@ jobs:
         puts "Config created: #{config.class}"
         EOF
         
-        ruby minimal_coverage_test.rb
+        bundle exec ruby minimal_coverage_test.rb
         echo "After minimal test:"
         ls -la
         ls -la coverage/ || echo "No coverage directory"
