@@ -108,16 +108,19 @@ RSpec.configure do |config|
     FileUtils.mkdir_p('tmp/test_output')
     
     # Store original streams and replace with StringIO to prevent output from affecting exit codes
-    @original_stderr = $stderr
-    @original_stdout = $stdout
-    $stderr = StringIO.new
-    $stdout = StringIO.new
+    # But preserve streams in CI so SimpleCov can write coverage files
+    unless ENV['CI']
+      @original_stderr = $stderr
+      @original_stdout = $stdout
+      $stderr = StringIO.new
+      $stdout = StringIO.new
+    end
   end
 
   config.after(:suite) do
     FileUtils.rm_rf('tmp/test_output') if Dir.exist?('tmp/test_output')
     
-    # Restore original streams
+    # Restore original streams (only if we replaced them)
     if @original_stderr && @original_stdout
       $stderr = @original_stderr
       $stdout = @original_stdout
