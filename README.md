@@ -4,7 +4,7 @@ A tool for importing web content into YaleSite text blocks through YAML files, s
 
 ## Overview
 
-Text Block Importer is a set of Ruby and shell scripts that helps you:
+Text Block Importer is a Ruby-based tool that helps you:
 
 1. Extract content from websites using CSS selectors
 2. Convert the extracted content into YAML files formatted for YaleSite text blocks
@@ -33,75 +33,97 @@ This tool is especially useful when migrating content from other websites into a
    gem install nokogiri
    ```
 
-3. Make the shell scripts executable:
+3. Make the main script executable:
    ```bash
-   chmod +x makeYamls.sh retrieveSitemap
+   chmod +x text_block_importer
    ```
 
 ## Usage
 
-The tool offers several ways to extract and process content:
+The tool provides a unified command-line interface with several subcommands:
 
-### 1. Extracting URLs from a Page
-
-To extract URLs from a page using a CSS selector:
-
-```bash
-ruby extractUrls.rb <URL> <CSS selector>
-```
-
-Example:
-```bash
-ruby extractUrls.rb https://example.yale.edu/policies .content-main
-```
-
-This will output a list of URLs that can be saved to a file for further processing.
-
-### 2. Creating a Single YAML File
+### 1. Creating a Single YAML File
 
 To create a YAML file for a single page:
 
 ```bash
-ruby createYaml.rb <URL> <CSS selector> <template file> <output file> [--use-domains]
+./text_block_importer scrape <URL> <CSS selector> <template file> <output file> [--use-domains]
 ```
 
 Example:
 ```bash
-ruby createYaml.rb https://example.yale.edu/page.html "main .content" template.yml output.yml
+./text_block_importer scrape https://example.yale.edu/page.html "main .content" template.yml output.yml
 ```
 
 Options:
 - `--use-domains`: Replace relative URLs with the full domain path from the source website
 
-### 3. Processing Multiple URLs
+### 2. Processing Multiple URLs (Batch)
 
 To process multiple URLs and create YAML files for each:
 
 ```bash
-./makeYamls.sh <url_file> <CSS selector> <template file> [--use-domains]
+./text_block_importer batch <url_file> <CSS selector> <template file> [--use-domains]
 ```
 
 Example:
 ```bash
-./makeYamls.sh urls.txt ".main-content" template.yml --use-domains
+./text_block_importer batch urls.txt ".main-content" template.yml --use-domains
 ```
 
 This will generate numbered YAML files (node-1.output.yml, node-2.output.yml, etc.) for each URL in the input file.
 
-### 4. Processing a Sitemap
+### 3. Extracting URLs from a Page
 
-To extract URLs from a sitemap:
+To extract URLs from a page using a CSS selector:
 
 ```bash
-./retrieveSitemap <sitemap URL>
+./text_block_importer extract-urls <URL> <CSS selector>
 ```
 
 Example:
 ```bash
-./retrieveSitemap https://example.yale.edu/sitemap.xml
+./text_block_importer extract-urls https://example.yale.edu/policies .content-main
 ```
 
-This will create a `sitemap.links` file containing all URLs from the sitemap, which can then be used with `makeYamls.sh`.
+This will output a list of URLs that can be saved to a file for further processing.
+
+### 4. Processing a Sitemap (with Recursive Support)
+
+To extract URLs from a sitemap:
+
+```bash
+./text_block_importer sitemap <sitemap URL> [--output filename]
+```
+
+Examples:
+```bash
+# Use default output file (sitemap.links)
+./text_block_importer sitemap https://example.yale.edu/sitemap.xml
+
+# Specify custom output filename
+./text_block_importer sitemap https://example.yale.edu/sitemap.xml --output yale-urls.txt
+```
+
+This will create a file containing all URLs from the sitemap. **The tool automatically detects and processes nested sitemaps** - if the main sitemap contains links to other sitemaps (like `sitemap-posts.xml`, `sitemap-pages.xml`), they will be processed recursively and all URLs will be aggregated into a single output file.
+
+#### Nested Sitemap Detection
+
+The tool intelligently detects nested sitemaps by checking if URLs:
+- Have the same domain as the parent sitemap
+- Are in the same directory path  
+- Follow sitemap naming patterns (contain "sitemap" and end with ".xml")
+- Are not regular web pages
+
+This works great for WordPress sites and other CMS platforms that generate multiple sitemap files.
+
+### Getting Help
+
+To see all available commands and options:
+
+```bash
+./text_block_importer --help
+```
 
 ## Template Replacements
 
@@ -116,21 +138,55 @@ The following placeholders in your template file will be replaced:
 | `{REPLACEME}` | The HTML content extracted from the CSS selector |
 | `{SOURCE_URL}` | The original source URL |
 
+## Output Organization
+
+The tool automatically organizes output files into domain-based directories to prevent collisions:
+
+```
+output/
+├── example.yale.edu/
+│   ├── sitemap.links
+│   ├── node-1.output.yml
+│   ├── node-2.output.yml
+│   └── ...
+└── other-site.edu/
+    ├── sitemap.links
+    └── ...
+```
+
+This structure allows you to:
+- Process multiple sites without file conflicts
+- Keep outputs organized by source domain
+- Use `.gitignore` to exclude the entire `output/` directory
+- Configure the behavior in `config/default.yml` or custom config files
+
 ## Example Workflow
 
 A complete workflow might look like:
 
 1. Extract URLs from a sitemap:
    ```bash
-   ./retrieveSitemap https://example.yale.edu/sitemap.xml
+   ./text_block_importer sitemap https://example.yale.edu/sitemap.xml
+   # Creates: output/example.yale.edu/sitemap.links
    ```
 
-2. Process all URLs from the sitemap:
+2. Process all URLs using the sitemap file:
    ```bash
-   ./makeYamls.sh sitemap.links ".content-main" template.yml
+   ./text_block_importer batch output/example.yale.edu/sitemap.links ".content-main" template.yml
+   # Creates: output/example.yale.edu/node-*.output.yml
    ```
 
-3. Import the resulting YAML files into your YaleSite instance using the single content sync process.
+3. Import the resulting YAML files from `output/example.yale.edu/` into your YaleSite instance.
+
+### Custom Output Names
+```bash
+# Custom sitemap filename
+./text_block_importer sitemap https://example.yale.edu/sitemap.xml --output yale-pages.txt
+# Creates: output/example.yale.edu/yale-pages.txt
+
+# Process with custom file
+./text_block_importer batch output/example.yale.edu/yale-pages.txt ".content-main" template.yml
+```
 
 ## Troubleshooting
 
@@ -138,7 +194,30 @@ If you encounter issues:
 
 - No content extracted: Check if your CSS selector is correct. The tool will show warnings when no content is found.
 - XML parsing errors: Make sure you have libxml2 installed for sitemap processing.
-- Script execution errors: Ensure scripts have execute permissions (`chmod +x script_name`).
+- Script execution errors: Ensure the main script has execute permissions (`chmod +x text_block_importer`).
+
+## Migration from Legacy Scripts
+
+If you were using the original Ruby/shell scripts, here's how to migrate to the new unified CLI:
+
+| Legacy Command | New Command |
+|----------------|-------------|
+| `ruby createYaml.rb <url> <selector> <template> <output> [--use-domains]` | `./text_block_importer scrape <url> <selector> <template> <output> [--use-domains]` |
+| `./makeYamls.sh <url_file> <selector> <template> [--use-domains]` | `./text_block_importer batch <url_file> <selector> <template> [--use-domains]` |
+| `ruby extractUrls.rb <url> <selector>` | `./text_block_importer extract-urls <url> <selector>` |
+| `./retrieveSitemap <sitemap_url>` | `./text_block_importer sitemap <sitemap_url>` |
+
+The original scripts (`createYaml.rb`, `makeYamls.sh`, `extractUrls.rb`, `retrieveSitemap`) remain available for backward compatibility, but we recommend using the new unified CLI for better maintainability and error handling.
+
+## Architecture
+
+The refactored version uses a modular Ruby architecture with:
+
+- **Unified CLI**: Single command interface with subcommands
+- **Error Handling**: Custom exception hierarchy with meaningful messages
+- **HTTP Client**: Reusable client with retry logic and redirect handling
+- **Modular Design**: Separate classes for scraping, YAML generation, and URL extraction
+- **Configuration**: Centralized configuration management
 
 ## Contributing
 

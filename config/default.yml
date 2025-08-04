@@ -1,0 +1,60 @@
+# Text Block Importer Configuration
+
+# HTTP Client Settings
+http:
+  timeout: 30
+  retries: 3
+  user_agent: "TextBlockImporter/2.0"
+  follow_redirects: true
+
+# Logging Configuration
+logging:
+  level: info  # debug, info, warn, error, fatal
+  output: stdout  # stdout, stderr, or file path
+
+# Content Processing
+processing:
+  # Remove newlines from extracted content
+  strip_newlines: true
+  # Encode single quotes as HTML entities
+  encode_quotes: true
+  # Warn when selectors return no content
+  warn_empty_content: true
+
+# Template System
+templates:
+  # Default template tokens
+  tokens:
+    name_selector: "h1"  # CSS selector for page title
+    encode_title: true   # Encode quotes in title
+
+# Batch Processing
+batch:
+  # Show progress during batch operations
+  show_progress: true
+  # Continue processing on individual failures
+  continue_on_error: true
+  # Maximum concurrent requests (future enhancement)
+  max_concurrent: 5
+
+# Sitemap Processing
+sitemap:
+  # Enable recursive parsing of nested sitemaps
+  recursive: true
+  # Maximum recursion depth to prevent infinite loops
+  max_depth: 3
+  # Only follow sitemaps from the same domain
+  same_domain_only: true
+
+# Output Settings
+output:
+  # Default output filename pattern for batch operations
+  filename_pattern: "node-{index}.output.yml"
+  # Create output directory if it doesn't exist
+  create_directories: true
+  # Base directory for all output files
+  base_directory: "output"
+  # Use domain-based subdirectories (e.g., output/example.com/)
+  use_domain_directories: true
+  # Sanitize domain names for filesystem compatibility
+  sanitize_domain_names: true

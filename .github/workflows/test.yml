@@ -1,0 +1,97 @@
+name: Test Suite
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+
+env:
+  COVERAGE: true
+  CI: true
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    
+    strategy:
+      matrix:
+        ruby-version: ['3.2']
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Ruby ${{ matrix.ruby-version }}
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: ${{ matrix.ruby-version }}
+        bundler-cache: true
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libxml2-utils curl
+
+    - name: Create necessary directories
+      run: |
+        mkdir -p tmp
+        mkdir -p log
+        mkdir -p coverage
+
+    - name: Install dependencies
+      run: |
+        bundle install --jobs 4 --retry 3
+
+    - name: Verify dependencies
+      run: bundle exec rake verify:deps
+
+    # - name: Run linter
+    #   run: bundle exec rubocop --display-cop-names
+
+    - name: Run full test suite with coverage
+      run: bundle exec rspec
+      
+
+    - name: Archive test results
+      if: always()
+      uses: actions/upload-artifact@v4
+      with:
+        name: test-results-${{ matrix.ruby-version }}
+        path: coverage/
+        if-no-files-found: warn
+
+  security:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Ruby
+      uses: ruby/setup-ruby@v1
+      with:
+        ruby-version: '3.2'
+        bundler-cache: true
+    
+    - name: Run Bundler Audit
+      run: |
+        gem install bundler-audit
+        bundle audit --update
+
+  # performance:
+  #   runs-on: ubuntu-latest
+  #
+  #   steps:
+  #   - uses: actions/checkout@v4
+  #
+  #   - name: Set up Ruby
+  #     uses: ruby/setup-ruby@v1
+  #     with:
+  #       ruby-version: '3.2'
+  #       bundler-cache: true
+  #
+  #   - name: Run performance tests
+  #     run: |
+  #       bundle exec rspec spec/integration/full_workflow_spec.rb -t performance --format progress
+  #     env:
+  #       PERFORMANCE_TESTS: true
