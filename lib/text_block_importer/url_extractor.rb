@@ -16,7 +16,7 @@ module TextBlockImporter
       links = doc.css(selector)
       
       if links.empty?
-        STDERR.puts("No data found for the given selector.")
+        # Return empty array silently when no links found
         return []
       end
       

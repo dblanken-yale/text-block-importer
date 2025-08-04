@@ -178,10 +178,13 @@ RSpec.describe TextBlockImporter::YamlGenerator do
       end
 
       it 'warns about failed replacements and continues' do
-        expect { subject.generate(scraped_content_with_nil_title, options) }
+        # Create generator without logger so it outputs to STDERR
+        generator_without_logger = described_class.new(template_path, config, nil)
+        
+        expect { generator_without_logger.generate(scraped_content_with_nil_title, options) }
           .to output(/Could not replace for/).to_stderr
 
-        result = subject.generate(scraped_content_with_nil_title, options)
+        result = generator_without_logger.generate(scraped_content_with_nil_title, options)
         expect(result).to include('{NAME}') # Token remains unreplaced
       end
     end

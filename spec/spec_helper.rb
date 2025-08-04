@@ -40,6 +40,24 @@ if ENV['COVERAGE'] || ENV['CI']
     # Don't fail on STDERR output from CLI tests
     enable_coverage :branch
     primary_coverage :line
+    
+    # In CI environments, suppress STDERR during SimpleCov processing to prevent
+    # test output from being interpreted as errors
+    if ENV['CI']
+      original_stderr = $stderr
+      at_exit do
+        # Temporarily suppress STDERR during SimpleCov.result call
+        $stderr = File.open(File::NULL, 'w')
+        SimpleCov.result.tap do |result|
+          $stderr = original_stderr
+          # Output coverage info to original stderr
+          $stderr.puts "Line Coverage: #{result.covered_percent.round(2)}% (#{result.covered_lines} / #{result.total_lines})"
+          if result.respond_to?(:branch_covered_percent) && result.total_branches > 0
+            $stderr.puts "Branch Coverage: #{result.branch_covered_percent.round(2)}% (#{result.covered_branches} / #{result.total_branches})"
+          end
+        end
+      end
+    end
   end
 end
 
@@ -110,13 +128,12 @@ RSpec.configure do |config|
     # Reset any global state if needed
   end
   
-  # Silence STDERR globally during tests to prevent SimpleCov from detecting CLI error outputs as real errors
-  if ENV['COVERAGE'] || ENV['CI']
+  # Helper method to suppress STDERR for specific tests that produce expected error output
+  def suppress_stderr
     original_stderr = $stderr
     $stderr = StringIO.new
-    
-    config.after(:suite) do
-      $stderr = original_stderr
-    end
+    yield
+  ensure
+    $stderr = original_stderr
   end
 end

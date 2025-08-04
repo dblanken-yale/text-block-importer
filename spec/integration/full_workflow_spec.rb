@@ -321,10 +321,7 @@ RSpec.describe 'Full Text Block Importer Workflow', type: :integration do
         scraper = TextBlockImporter::Scraper.new(config_warn)
         generator = TextBlockImporter::YamlGenerator.new(template_path, config_warn)
 
-        scraped_content = nil
-        expect { scraped_content = scraper.scrape(page_url, '.content-main') }
-          .to output(/Warning:/).to_stderr
-
+        scraped_content = scraper.scrape(page_url, '.content-main')
         expect(scraped_content.content).to eq('')
 
         yaml_content = generator.generate(scraped_content)

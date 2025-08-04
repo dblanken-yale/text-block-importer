@@ -39,7 +39,6 @@ module TextBlockImporter
         if @config.warn_empty_content?
           warning = "No data found for selector '#{selector}'"
           @logger&.warn(warning)
-          $stderr.puts("Warning: #{warning}")
         end
         return ''
       end

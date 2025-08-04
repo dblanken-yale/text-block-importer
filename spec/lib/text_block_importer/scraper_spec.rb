@@ -178,9 +178,9 @@ RSpec.describe TextBlockImporter::Scraper do
         allow(TextBlockImporter::HttpClient).to receive(:new).and_return(http_client)
         scraper = described_class.new(config_warn, logger)
         
-        result = nil
-        expect { result = scraper.scrape(url, '.content-main') }.to output(/Warning:/).to_stderr
+        expect(logger).to receive(:warn).with(/No data found for selector/)
         
+        result = scraper.scrape(url, '.content-main')
         expect(result.content).to eq('')
       end
 

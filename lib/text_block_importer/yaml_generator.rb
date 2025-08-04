@@ -20,7 +20,11 @@ module TextBlockImporter
         if value
           content.gsub!(placeholder, value.to_s)
         else
-          $stderr.puts "Could not replace for #{placeholder}"
+          if @logger
+            @logger.warn("Could not replace for #{placeholder}")
+          else
+            $stderr.puts "Could not replace for #{placeholder}"
+          end
         end
       end
       
