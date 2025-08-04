@@ -71,6 +71,29 @@ jobs:
           puts 'Coverage dir: ' + SimpleCov.coverage_dir
         " || echo "Failed to start SimpleCov"
 
+    - name: Create minimal SimpleCov test
+      run: |
+        echo "Creating minimal coverage test..."
+        cat > minimal_coverage_test.rb << 'EOF'
+        require 'simplecov'
+        SimpleCov.start do
+          add_filter '/spec/'
+          formatter SimpleCov::Formatter::HTMLFormatter
+        end
+        
+        # Require our main library to get some coverage
+        require_relative 'lib/text_block_importer'
+        
+        # Create some dummy coverage
+        config = TextBlockImporter::Config.new
+        puts "Config created: #{config.class}"
+        EOF
+        
+        ruby minimal_coverage_test.rb
+        echo "After minimal test:"
+        ls -la
+        ls -la coverage/ || echo "No coverage directory"
+
     - name: Run full test suite with coverage
       run: |
         echo "Starting test suite with coverage..."
@@ -78,11 +101,13 @@ jobs:
         ls -la
         echo "Spec helper check:"
         head -10 spec/spec_helper.rb
-        echo "Running tests..."
-        bundle exec rspec --format progress
+        echo "Running tests with explicit env vars..."
+        COVERAGE=true CI=true bundle exec rspec --format progress
         echo "Test suite completed, exit code: $?"
         echo "Current directory after tests:"
         ls -la
+        echo "Checking for any coverage-related files:"
+        find . -name "*.json" -o -name "coverage*" -o -name ".resultset*" | head -10
       
     - name: Verify coverage files were generated
       run: |
