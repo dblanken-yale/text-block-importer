@@ -49,8 +49,40 @@ jobs:
     # - name: Run linter
     #   run: bundle exec rubocop --display-cop-names
 
+    - name: Debug environment and SimpleCov
+      run: |
+        echo "Environment variables:"
+        echo "COVERAGE=$COVERAGE"
+        echo "CI=$CI"
+        echo "Ruby version: $(ruby --version)"
+        echo "SimpleCov gem installed:"
+        bundle list | grep simplecov || echo "SimpleCov not found"
+        echo "Testing SimpleCov require:"
+        ruby -e "require 'simplecov'; puts 'SimpleCov loaded successfully'" || echo "Failed to load SimpleCov"
+        echo "Testing SimpleCov start:"
+        ruby -e "
+          ENV['COVERAGE'] = 'true'
+          ENV['CI'] = 'true'
+          require 'simplecov'
+          SimpleCov.start do
+            add_filter '/spec/'
+          end
+          puts 'SimpleCov started successfully'
+          puts 'Coverage dir: ' + SimpleCov.coverage_dir
+        " || echo "Failed to start SimpleCov"
+
     - name: Run full test suite with coverage
-      run: bundle exec rspec
+      run: |
+        echo "Starting test suite with coverage..."
+        echo "Current directory contents:"
+        ls -la
+        echo "Spec helper check:"
+        head -10 spec/spec_helper.rb
+        echo "Running tests..."
+        bundle exec rspec --format progress
+        echo "Test suite completed, exit code: $?"
+        echo "Current directory after tests:"
+        ls -la
       
     - name: Verify coverage files were generated
       run: |
