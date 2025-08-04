@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require 'spec_helper'
+require 'tempfile'
 
 RSpec.describe TextBlockImporter::CLI do
   let(:config) { instance_double('TextBlockImporter::Config') }
