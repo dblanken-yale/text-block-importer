@@ -9,6 +9,11 @@ RSpec.describe TextBlockImporter::CLI do
   let(:logger_with_context) { instance_double('TextBlockImporter::CustomLogger') }
   
   before do
+    # Stub exit to prevent tests from actually exiting the process, but still raise SystemExit for tests
+    allow_any_instance_of(described_class).to receive(:exit) do |instance, code|
+      raise SystemExit.new(code || 0)
+    end
+    
     allow(TextBlockImporter::Config).to receive(:new).and_return(config)
     allow(TextBlockImporter::CustomLogger).to receive(:new).and_return(logger)
     allow(logger).to receive(:with_context).and_return(logger_with_context)
