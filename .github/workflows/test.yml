@@ -52,35 +52,6 @@ jobs:
     - name: Run full test suite with coverage
       run: bundle exec rspec
       
-    - name: Generate coverage summary
-      run: |
-        if [ -f coverage/.last_run.json ]; then
-          echo "COVERAGE_PERCENT=$(bundle exec ruby -rjson -e "puts JSON.parse(File.read('coverage/.last_run.json'))['result']['line']")" >> $GITHUB_ENV
-        fi
-
-    - name: Comment coverage on PR
-      if: github.event_name == 'pull_request'
-      uses: actions/github-script@v7
-      with:
-        github-token: ${{ secrets.GITHUB_TOKEN }}
-        script: |
-          const coverage = process.env.COVERAGE_PERCENT;
-          if (coverage) {
-            const body = \`## 📊 Coverage Report
-            
-            **Line Coverage:** \${coverage}%
-            
-            📋 [Download detailed coverage report](https://github.com/\${{ github.repository }}/actions/runs/\${{ github.run_id }}) (check artifacts section)
-            
-            💡 *Coverage report includes detailed line-by-line analysis*\`;
-            
-            github.rest.issues.createComment({
-              issue_number: context.issue.number,
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              body: body
-            });
-          }
 
     - name: Archive test results
       if: always()
