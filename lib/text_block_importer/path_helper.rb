@@ -41,7 +41,9 @@ module TextBlockImporter
     private
     
     def extract_domain(url)
-      URI.parse(url).host
+      parsed_uri = URI.parse(url)
+      return 'unknown-domain' if parsed_uri.host.nil? || parsed_uri.host.empty?
+      parsed_uri.host
     rescue URI::InvalidURIError
       @logger&.warn("Invalid URL for domain extraction: #{url}")
       'unknown-domain'
@@ -49,11 +51,13 @@ module TextBlockImporter
     
     def sanitize_domain(domain)
       return domain unless @config.sanitize_domain_names?
+      return 'empty-domain' if domain.nil? || domain.empty?
       
       # Replace characters that aren't filesystem-safe
       sanitized = domain.gsub(/[^\w.-]/, '_')
       # Remove leading/trailing dots and underscores
-      sanitized.gsub(/^[._]+|[._]+$/, '')
+      result = sanitized.gsub(/^[._]+|[._]+$/, '')
+      result.empty? ? 'sanitized-domain' : result
     end
     
     def ensure_directory_exists(directory)
