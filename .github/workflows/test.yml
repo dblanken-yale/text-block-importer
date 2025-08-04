@@ -49,113 +49,30 @@ jobs:
     # - name: Run linter
     #   run: bundle exec rubocop --display-cop-names
 
-    - name: Debug environment and SimpleCov
-      run: |
-        echo "Environment variables:"
-        echo "COVERAGE=$COVERAGE"
-        echo "CI=$CI"
-        echo "Ruby version: $(ruby --version)"
-        echo "SimpleCov gem installed:"
-        bundle list | grep simplecov || echo "SimpleCov not found"
-        echo "Testing SimpleCov require:"
-        bundle exec ruby -e "require 'simplecov'; puts 'SimpleCov loaded successfully'" || echo "Failed to load SimpleCov"
-        echo "Testing SimpleCov start:"
-        bundle exec ruby -e "
-          ENV['COVERAGE'] = 'true'
-          ENV['CI'] = 'true'
-          require 'simplecov'
-          SimpleCov.start do
-            add_filter '/spec/'
-          end
-          puts 'SimpleCov started successfully'
-          puts 'Coverage dir: ' + SimpleCov.coverage_dir
-        " || echo "Failed to start SimpleCov"
-
-    - name: Create minimal SimpleCov test
-      run: |
-        echo "Creating minimal coverage test..."
-        cat > minimal_coverage_test.rb << 'EOF'
-        require 'simplecov'
-        SimpleCov.start do
-          add_filter '/spec/'
-          formatter SimpleCov::Formatter::HTMLFormatter
-        end
-        
-        # Require our main library to get some coverage
-        require_relative 'lib/text_block_importer'
-        
-        # Create some dummy coverage
-        config = TextBlockImporter::Config.new
-        puts "Config created: #{config.class}"
-        EOF
-        
-        bundle exec ruby minimal_coverage_test.rb
-        echo "After minimal test:"
-        ls -la
-        ls -la coverage/ || echo "No coverage directory"
-
     - name: Run full test suite with coverage
-      run: |
-        echo "Starting test suite with coverage..."
-        echo "Current directory contents:"
-        ls -la
-        echo "Spec helper check:"
-        head -10 spec/spec_helper.rb
-        echo "Running tests with explicit env vars..."
-        COVERAGE=true CI=true bundle exec rspec --format progress
-        echo "Test suite completed, exit code: $?"
-        echo "Current directory after tests:"
-        ls -la
-        echo "Checking for any coverage-related files:"
-        find . -name "*.json" -o -name "coverage*" -o -name ".resultset*" | head -10
+      run: bundle exec rspec
       
-    - name: Verify coverage files were generated
-      run: |
-        echo "Checking for coverage files..."
-        ls -la coverage/ || echo "Coverage directory not found"
-        if [ -f "coverage/index.html" ]; then
-          echo "✅ Coverage HTML report generated"
-        else
-          echo "❌ Coverage HTML report missing"
-        fi
-        if [ -f "coverage/.resultset.json" ]; then
-          echo "✅ Coverage JSON data found"
-          echo "File size: $(wc -c < coverage/.resultset.json) bytes"
-        else
-          echo "❌ Coverage JSON data missing"
-        fi
-
     - name: Generate coverage summary
       run: |
-        if [ -f coverage/.resultset.json ]; then
-          # Extract coverage percentage from SimpleCov resultset
-          echo "COVERAGE_PERCENT=$(ruby -rjson -e "
-            data = JSON.parse(File.read('coverage/.resultset.json'))
-            if data['RSpec']
-              total_lines = data['RSpec']['coverage'].values.flatten.select { |x| x.is_a?(Integer) }.sum
-              covered_lines = data['RSpec']['coverage'].values.flatten.select { |x| x.is_a?(Integer) && x > 0 }.sum
-              percent = total_lines > 0 ? (covered_lines.to_f / total_lines * 100).round(2) : 0
-              puts percent
-            else
-              puts 'N/A'
-            end
-          ")" >> $GITHUB_ENV
+        if [ -f coverage/.last_run.json ]; then
+          echo "COVERAGE_PERCENT=$(bundle exec ruby -rjson -e "puts JSON.parse(File.read('coverage/.last_run.json'))['result']['line']")" >> $GITHUB_ENV
         fi
 
     - name: Comment coverage on PR
       if: github.event_name == 'pull_request'
       uses: actions/github-script@v7
       with:
+        github-token: ${{ secrets.GITHUB_TOKEN }}
         script: |
           const coverage = process.env.COVERAGE_PERCENT;
           if (coverage) {
-            const body = `## 📊 Coverage Report
+            const body = \`## 📊 Coverage Report
             
-            **Line Coverage:** ${coverage}%
+            **Line Coverage:** \${coverage}%
             
-            📋 [Download detailed coverage report](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}) (check artifacts section)
+            📋 [Download detailed coverage report](https://github.com/\${{ github.repository }}/actions/runs/\${{ github.run_id }}) (check artifacts section)
             
-            💡 *Coverage report includes detailed line-by-line analysis*`;
+            💡 *Coverage report includes detailed line-by-line analysis*\`;
             
             github.rest.issues.createComment({
               issue_number: context.issue.number,
