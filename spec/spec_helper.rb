@@ -110,15 +110,13 @@ RSpec.configure do |config|
     # Reset any global state if needed
   end
   
-  # Silence STDERR during CLI tests to prevent SimpleCov from detecting "errors"
-  config.around(:each, type: :unit) do |example|
-    if example.metadata[:full_description].include?('CLI')
-      original_stderr = $stderr
-      $stderr = StringIO.new
-      example.run
+  # Silence STDERR globally during tests to prevent SimpleCov from detecting CLI error outputs as real errors
+  if ENV['COVERAGE'] || ENV['CI']
+    original_stderr = $stderr
+    $stderr = StringIO.new
+    
+    config.after(:suite) do
       $stderr = original_stderr
-    else
-      example.run
     end
   end
 end
