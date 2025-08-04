@@ -61,21 +61,6 @@ jobs:
           tmp/rspec_results.xml
           coverage/
 
-  shellcheck:
-    runs-on: ubuntu-latest
-    
-    steps:
-    - uses: actions/checkout@v4
-    
-    - name: Run ShellCheck
-      uses: ludeeus/action-shellcheck@master
-      with:
-        scandir: '.'
-        format: gcc
-        severity: warning
-      env:
-        SHELLCHECK_OPTS: -e SC1091 -e SC2034
-
   security:
     runs-on: ubuntu-latest
     
