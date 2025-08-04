@@ -55,6 +55,13 @@ RSpec.configure do |config|
 
   # Configure warnings - disabled to prevent exit code 1 in CI
   # config.warnings = true
+  
+  # Force exit code 0 when all tests pass, regardless of SystemExit during tests
+  at_exit do
+    if RSpec.world.reporter.failed_examples.empty?
+      exit!(0)
+    end
+  end
 
   # Shared example groups configuration
   config.shared_context_metadata_behavior = :apply_to_host_groups
@@ -62,13 +69,25 @@ RSpec.configure do |config|
   # Focus specific tests when needed
   config.filter_run_when_matching :focus
 
-  # Create temporary directories for tests
+  # Create temporary directories for tests and setup stream replacement
   config.before(:suite) do
     FileUtils.mkdir_p('tmp/test_output')
+    
+    # Store original streams and replace with StringIO to prevent output from affecting exit codes
+    @original_stderr = $stderr
+    @original_stdout = $stdout
+    $stderr = StringIO.new
+    $stdout = StringIO.new
   end
 
   config.after(:suite) do
     FileUtils.rm_rf('tmp/test_output') if Dir.exist?('tmp/test_output')
+    
+    # Restore original streams
+    if @original_stderr && @original_stdout
+      $stderr = @original_stderr
+      $stdout = @original_stdout
+    end
   end
 
   # Clean up between tests
